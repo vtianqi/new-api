@@ -39,6 +39,8 @@ const routerMap = {
   user: '/console/user',
   subscription: '/console/subscription',
   log: '/console/log',
+  revenue: '/console/revenue',
+  usage: '/console/usage',
   midjourney: '/console/midjourney',
   setting: '/console/setting',
   about: '/about',
@@ -88,6 +90,11 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         text: t('使用日志'),
         itemKey: 'log',
         to: '/log',
+      },
+      {
+        text: t('我的用量'),
+        itemKey: 'usage',
+        to: '/usage',
       },
       {
         text: t('绘图日志'),
@@ -181,6 +188,12 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         text: t('用户管理'),
         itemKey: 'user',
         to: '/user',
+        className: isAdmin() ? '' : 'tableHiddle',
+      },
+      {
+        text: t('营收分析'),
+        itemKey: 'revenue',
+        to: '/console/revenue',
         className: isAdmin() ? '' : 'tableHiddle',
       },
       {

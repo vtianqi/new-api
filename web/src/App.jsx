@@ -55,6 +55,8 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const About = lazy(() => import('./pages/About'));
 const UserAgreement = lazy(() => import('./pages/UserAgreement'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const RevenueAdmin = lazy(() => import('./pages/Revenue/AdminRevenue'));
+const RevenueUser = lazy(() => import('./pages/Revenue/UserRevenue'));
 
 function DynamicOAuth2Callback() {
   const { provider } = useParams();
@@ -282,6 +284,26 @@ function App() {
           element={
             <PrivateRoute>
               <Log />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path='/console/revenue'
+          element={
+            <PrivateRoute>
+              <Suspense fallback={<Loading />} key={location.pathname}>
+                <RevenueAdmin />
+              </Suspense>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path='/console/usage'
+          element={
+            <PrivateRoute>
+              <Suspense fallback={<Loading />} key={location.pathname}>
+                <RevenueUser />
+              </Suspense>
             </PrivateRoute>
           }
         />
