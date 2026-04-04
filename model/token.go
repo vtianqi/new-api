@@ -28,6 +28,7 @@ type Token struct {
 	UsedQuota          int            `json:"used_quota" gorm:"default:0"` // used quota
 	Group              string         `json:"group" gorm:"default:''"`
 	CrossGroupRetry    bool           `json:"cross_group_retry"` // 跨分组重试，仅auto分组有效
+	FallbackStrategy   string         `json:"fallback_strategy" gorm:"type:varchar(20);default:'strict'"` // strict=严格不降级, allow=允许降级, aggressive=最大降级
 	DeletedAt          gorm.DeletedAt `gorm:"index"`
 }
 

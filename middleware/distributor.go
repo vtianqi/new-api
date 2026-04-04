@@ -134,22 +134,38 @@ func Distribute() func(c *gin.Context) {
 						TokenGroup: usingGroup,
 						Retry:      common.GetPointer(0),
 					})
-					if err != nil {
-						showGroup := usingGroup
-						if usingGroup == "auto" {
-							showGroup = fmt.Sprintf("auto(%s)", selectGroup)
+					if err != nil || channel == nil {
+						// 尝试降级
+						fallbackStrategy := common.GetContextKeyString(c, constant.ContextKeyTokenFallbackStrategy)
+						if fallbackStrategy == "allow" || fallbackStrategy == "aggressive" {
+							fallbackModel := getFallbackModel(modelRequest.Model, fallbackStrategy)
+							if fallbackModel != "" && fallbackModel != modelRequest.Model {
+								fallbackChannel, fallbackGroup, fallbackErr := service.CacheGetRandomSatisfiedChannel(&service.RetryParam{
+									Ctx:        c,
+									ModelName:  fallbackModel,
+									TokenGroup: usingGroup,
+									Retry:      common.GetPointer(0),
+								})
+								if fallbackErr == nil && fallbackChannel != nil {
+									channel = fallbackChannel
+									selectGroup = fallbackGroup
+									modelRequest.Model = fallbackModel
+									common.SysLog(fmt.Sprintf("模型降级: %s -> %s (策略: %s)", modelRequest.Model, fallbackModel, fallbackStrategy))
+								}
+							}
 						}
-						message := i18n.T(c, i18n.MsgDistributorGetChannelFailed, map[string]any{"Group": showGroup, "Model": modelRequest.Model, "Error": err.Error()})
-						// 如果错误，但是渠道不为空，说明是数据库一致性问题
-						//if channel != nil {
-						//	common.SysError(fmt.Sprintf("渠道不存在：%d", channel.Id))
-						//	message = "数据库一致性已被破坏，请联系管理员"
-						//}
-						abortWithOpenAiMessage(c, http.StatusServiceUnavailable, message, types.ErrorCodeModelNotFound)
-						return
 					}
 					if channel == nil {
-						abortWithOpenAiMessage(c, http.StatusServiceUnavailable, i18n.T(c, i18n.MsgDistributorNoAvailableChannel, map[string]any{"Group": usingGroup, "Model": modelRequest.Model}), types.ErrorCodeModelNotFound)
+						if err != nil {
+							showGroup := usingGroup
+							if usingGroup == "auto" {
+								showGroup = fmt.Sprintf("auto(%s)", selectGroup)
+							}
+							message := i18n.T(c, i18n.MsgDistributorGetChannelFailed, map[string]any{"Group": showGroup, "Model": modelRequest.Model, "Error": err.Error()})
+							abortWithOpenAiMessage(c, http.StatusServiceUnavailable, message, types.ErrorCodeModelNotFound)
+						} else {
+							abortWithOpenAiMessage(c, http.StatusServiceUnavailable, i18n.T(c, i18n.MsgDistributorNoAvailableChannel, map[string]any{"Group": usingGroup, "Model": modelRequest.Model}), types.ErrorCodeModelNotFound)
+						}
 						return
 					}
 				}
@@ -432,4 +448,36 @@ func extractModelNameFromGeminiPath(path string) string {
 
 	// 返回模型名部分
 	return path[startIndex : startIndex+colonIndex]
+}
+
+// getFallbackModel 根据降级策略返回降级模型名
+// strict: 不降级，返回空
+// allow: 降一级（opus->sonnet->haiku）
+// aggressive: 降到最低（直接haiku）
+func getFallbackModel(model string, strategy string) string {
+	// Claude 系列降级链
+	claudeFallback := map[string]string{
+		"claude-opus-4-6":         "claude-sonnet-4-6",
+		"claude-opus-4":           "claude-sonnet-4-6",
+		"claude-sonnet-4-6":       "claude-haiku-4",
+		"claude-sonnet-4":         "claude-haiku-4",
+		"claude-3-5-sonnet-20241022": "claude-haiku-4",
+		"claude-3-opus-20240229":  "claude-3-5-sonnet-20241022",
+	}
+	// aggressive 直接降到最低
+	claudeLowest := "claude-haiku-4"
+
+	if strategy == "aggressive" {
+		if model == claudeLowest {
+			return ""
+		}
+		return claudeLowest
+	}
+
+	if strategy == "allow" {
+		if fallback, ok := claudeFallback[model]; ok {
+			return fallback
+		}
+	}
+	return ""
 }

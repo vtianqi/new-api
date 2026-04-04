@@ -74,6 +74,7 @@ const EditTokenModal = (props) => {
     allow_ips: '',
     group: '',
     cross_group_retry: false,
+    fallback_strategy: 'strict',
     tokenCount: 1,
   });
 
@@ -391,6 +392,19 @@ const EditTokenModal = (props) => {
                       extraText={t(
                         '开启后，当前分组渠道失败时会按顺序尝试下一个分组的渠道',
                       )}
+                    />
+                  </Col>
+                  <Col span={24}>
+                    <Form.Select
+                      field='fallback_strategy'
+                      label={t('模型降级策略')}
+                      extraText={t('当请求的模型不可用时的处理方式')}
+                      optionList={[
+                        { label: t('严格模式（不降级，直接报错）'), value: 'strict' },
+                        { label: t('允许降级（Opus→Sonnet→Haiku）'), value: 'allow' },
+                        { label: t('最大降级（直接用最低档模型）'), value: 'aggressive' },
+                      ]}
+                      initValue='strict'
                     />
                   </Col>
                   <Col xs={24} sm={24} md={24} lg={10} xl={10}>
