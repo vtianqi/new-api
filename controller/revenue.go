@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/gin-gonic/gin"
 )
@@ -42,8 +43,8 @@ func GetRevenueStats(c *gin.Context) {
 		days = 7
 	}
 
-	// quota 换算比例（与 new-api 系统保持一致，500000 quota = 1元）
-	const quotaPerYuan = 500000.0
+	// quota 换算比例——读取系统全局配置 QuotaPerUnit
+	quotaPerYuan := common.QuotaPerUnit
 
 	now := time.Now()
 	startTime := now.AddDate(0, 0, -days).Unix()
@@ -166,7 +167,7 @@ func GetUserRevenueSelf(c *gin.Context) {
 		days = 7
 	}
 
-	const quotaPerYuan = 500000.0
+	quotaPerYuan := common.QuotaPerUnit
 	startTime := time.Now().AddDate(0, 0, -days).Unix()
 
 	// 每日用量

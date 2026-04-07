@@ -147,10 +147,14 @@ func Distribute() func(c *gin.Context) {
 									Retry:      common.GetPointer(0),
 								})
 								if fallbackErr == nil && fallbackChannel != nil {
+									originalModel := modelRequest.Model
 									channel = fallbackChannel
 									selectGroup = fallbackGroup
 									modelRequest.Model = fallbackModel
-									common.SysLog(fmt.Sprintf("模型降级: %s -> %s (策略: %s)", modelRequest.Model, fallbackModel, fallbackStrategy))
+									// 响应头通知客户实际使用的模型
+									c.Header("X-Model-Fallback", fallbackModel)
+									c.Header("X-Model-Original", originalModel)
+									common.SysLog(fmt.Sprintf("模型降级: %s -> %s (策略: %s)", originalModel, fallbackModel, fallbackStrategy))
 								}
 							}
 						}
