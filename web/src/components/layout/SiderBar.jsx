@@ -44,6 +44,7 @@ const routerMap = {
   midjourney: '/console/midjourney',
   setting: '/console/setting',
   about: '/about',
+  docs: '/docs',
   detail: '/console',
   pricing: '/pricing',
   task: '/console/task',
@@ -95,6 +96,11 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         text: t('我的用量'),
         itemKey: 'usage',
         to: '/usage',
+      },
+      {
+        text: t('API 文档'),
+        itemKey: 'docs',
+        to: '/docs',
       },
       {
         text: t('绘图日志'),

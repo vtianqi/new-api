@@ -294,6 +294,16 @@ func SetApiRouter(router *gin.Engine) {
 		// 营收分析接口
 		logRoute.GET("/revenue", middleware.AdminAuth(), controller.GetRevenueStats)
 		logRoute.GET("/revenue/self", middleware.UserAuth(), controller.GetUserRevenueSelf)
+		logRoute.GET("/today", middleware.AdminAuth(), controller.GetUserTodayQuota)
+
+		// IP 黑名单接口
+		ipRoute := apiRouter.Group("/ip-blacklist")
+		ipRoute.GET("/", middleware.AdminAuth(), controller.GetIPBlacklist)
+		ipRoute.POST("/", middleware.AdminAuth(), controller.AddIPBlacklist)
+		ipRoute.DELETE("/:ip", middleware.AdminAuth(), controller.RemoveIPBlacklist)
+
+		// 用量告警
+		apiRouter.GET("/quota-alert/config", middleware.AdminAuth(), controller.GetQuotaAlertConfig)
 
 		dataRoute := apiRouter.Group("/data")
 		dataRoute.GET("/", middleware.AdminAuth(), controller.GetAllQuotaDates)
