@@ -76,6 +76,9 @@ const TopUp = () => {
   const [waffoPayMethods, setWaffoPayMethods] = useState([]);
   const [waffoMinTopUp, setWaffoMinTopUp] = useState(1);
 
+  const [enableOxaPayTopUp, setEnableOxaPayTopUp] = useState(false);
+  const [oxaPayMinTopUp, setOxaPayMinTopUp] = useState(1);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
   const [payWay, setPayWay] = useState('');
@@ -346,6 +349,29 @@ const TopUp = () => {
     }
   };
 
+  const oxaPayTopUp = async () => {
+    try {
+      if (topUpCount < oxaPayMinTopUp) {
+        showError(t('充值数量不能小于') + oxaPayMinTopUp);
+        return;
+      }
+      setPaymentLoading(true);
+      const res = await API.post('/api/user/oxapay/pay', { amount: parseFloat(topUpCount) });
+      if (res !== undefined) {
+        const { success, data, message } = res.data;
+        if (success && data?.pay_link) {
+          window.open(data.pay_link, '_blank');
+        } else {
+          showError(message || t('支付请求失败'));
+        }
+      }
+    } catch (e) {
+      showError(t('支付请求失败'));
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
   const processCreemCallback = (data) => {
     // 与 Stripe 保持一致的实现方式
     window.open(data.checkout_url, '_blank');
@@ -495,6 +521,9 @@ const TopUp = () => {
           setEnableWaffoTopUp(enableWaffoTopUp);
           setWaffoPayMethods(data.waffo_pay_methods || []);
           setWaffoMinTopUp(data.waffo_min_topup || 1);
+          // OxaPay
+          setEnableOxaPayTopUp(data.enable_oxapay_topup || false);
+          setOxaPayMinTopUp(data.oxapay_min_topup || 1);
           setMinTopUp(minTopUpValue);
           setTopUpCount(minTopUpValue);
 
@@ -791,6 +820,8 @@ const TopUp = () => {
           enableWaffoTopUp={enableWaffoTopUp}
           waffoTopUp={waffoTopUp}
           waffoPayMethods={waffoPayMethods}
+          enableOxaPayTopUp={enableOxaPayTopUp}
+          oxaPayTopUp={oxaPayTopUp}
           presetAmounts={presetAmounts}
           selectedPreset={selectedPreset}
           selectPresetAmount={selectPresetAmount}

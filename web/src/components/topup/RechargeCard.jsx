@@ -90,6 +90,8 @@ const RechargeCard = ({
   enableWaffoTopUp,
   waffoTopUp,
   waffoPayMethods,
+  enableOxaPayTopUp,
+  oxaPayTopUp,
   subscriptionLoading = false,
   subscriptionPlans = [],
   billingPreference,
@@ -521,6 +523,22 @@ const RechargeCard = ({
                     </Space>
                   </Form.Slot>
                 )}
+
+              
+              {/* OxaPay USDT 充值区域 */}
+              {enableOxaPayTopUp && (
+                <Form.Slot label={t('USDT 充值 (OxaPay)')}>
+                  <Button
+                    theme='outline'
+                    type='tertiary'
+                    onClick={oxaPayTopUp}
+                    loading={paymentLoading}
+                    className='!rounded-lg !px-4 !py-2'
+                  >
+                    💰 USDT / BTC / ETH
+                  </Button>
+                </Form.Slot>
+              )}
 
               {/* Creem 充值区域 */}
               {enableCreemTopUp && creemProducts.length > 0 && (
