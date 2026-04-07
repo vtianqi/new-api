@@ -305,6 +305,21 @@ func SetApiRouter(router *gin.Engine) {
 		// 用量告警
 		apiRouter.GET("/quota-alert/config", middleware.AdminAuth(), controller.GetQuotaAlertConfig)
 
+		// 工单系统
+		ticketRoute := apiRouter.Group("/ticket")
+		ticketRoute.POST("/", middleware.UserAuth(), controller.CreateTicket)
+		ticketRoute.GET("/", middleware.UserAuth(), controller.GetUserTickets)
+		ticketRoute.GET("/admin", middleware.AdminAuth(), controller.GetAdminTickets)
+		ticketRoute.GET("/:id", middleware.UserAuth(), controller.GetTicketDetail)
+		ticketRoute.POST("/:id/reply", middleware.UserAuth(), controller.ReplyTicket)
+		ticketRoute.PUT("/:id/status", middleware.AdminAuth(), controller.UpdateTicketStatus)
+
+		// 手动触发账单邮件（管理员）
+		apiRouter.POST("/billing/send", middleware.AdminAuth(), controller.TriggerMonthlyBill)
+
+		// 系统状态（公开）
+		apiRouter.GET("/system-status", controller.GetSystemStatus)
+
 		dataRoute := apiRouter.Group("/data")
 		dataRoute.GET("/", middleware.AdminAuth(), controller.GetAllQuotaDates)
 		dataRoute.GET("/self", middleware.UserAuth(), controller.GetUserQuotaDates)

@@ -106,6 +106,17 @@ func main() {
 
 	go controller.AutomaticallyTestChannels()
 
+	// 每月一号自动发送账单邮件
+	go func() {
+		for {
+			now := time.Now()
+			// 计算下个月一日凌晨一点
+			nextMonth := time.Date(now.Year(), now.Month()+1, 1, 1, 0, 0, 0, now.Location())
+			time.Sleep(time.Until(nextMonth))
+			controller.SendMonthlyBillEmail()
+		}
+	}()
+
 	// Codex credential auto-refresh check every 10 minutes, refresh when expires within 1 day
 	service.StartCodexCredentialAutoRefreshTask()
 

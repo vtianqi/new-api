@@ -103,6 +103,11 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         to: '/docs',
       },
       {
+        text: t('我的工单'),
+        itemKey: 'ticket',
+        to: '/ticket',
+      },
+      {
         text: t('绘图日志'),
         itemKey: 'midjourney',
         to: '/midjourney',
