@@ -404,6 +404,13 @@ func updateOptionMap(key string, value string) (err error) {
 		setting.WaffoUnitPrice, _ = strconv.ParseFloat(value, 64)
 	case "WaffoMinTopUp":
 		setting.WaffoMinTopUp, _ = strconv.Atoi(value)
+	case "OxaPayApiKey":
+		setting.OxaPayApiKey = value
+		setting.OxaPayEnabled = value != ""
+	case "OxaPayCallbackKey":
+		setting.OxaPayCallbackKey = value
+	case "OxaPayMinTopUp":
+		setting.OxaPayMinTopUp, _ = strconv.Atoi(value)
 	case "TopupGroupRatio":
 		err = common.UpdateTopupGroupRatioByJSONString(value)
 	case "GitHubClientId":
